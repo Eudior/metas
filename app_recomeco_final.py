@@ -9,49 +9,58 @@ st.set_page_config(page_title="Painel de Metas de Vendas", layout="wide")
 # --- CSS Personalizado para Melhorias Visuais --- 
 st.markdown("""
 <style>
-    /* Barra de progresso principal (Meta Mensal) */
-    /* Seleciona a barra dentro do container da Meta Mensal */
-    div[data-testid="stVerticalBlock"]:has(h2:contains('Meta Mensal')) .stProgress > div > div > div > div {
-        height: 25px; /* Aumenta a altura da barra */
-        border-radius: 10px; /* Bordas arredondadas */
+    /* Centralização (Melhor esforço) */
+    .block-container {
+        max-width: 1200px; /* Limita a largura máxima */
+        padding-left: 2rem; /* Ajusta padding se necessário */
+        padding-right: 2rem;
+        /* margin: auto; /* Tentar centralizar o container principal - pode não funcionar perfeitamente */
     }
-    /* Barras de progresso menores (Semanais) */
-    /* Seleciona barras dentro dos blocos que NÃO contêm 'Meta Mensal' */
-    div[data-testid="stVerticalBlock"]:not(:has(h2:contains('Meta Mensal'))) .stProgress > div > div > div > div {
-         height: 20px; /* Altura para barras semanais */
-         border-radius: 8px; /* Bordas arredondadas */
+
+    /* Barra de progresso principal (Meta Mensal) - MAIS GROSSA */
+    div[data-testid="stVerticalBlock"]:has(h2:contains("Meta Mensal")) .stProgress > div > div > div > div {
+        height: 35px; /* Aumenta MUITO a altura da barra */
+        border-radius: 15px; /* Bordas mais arredondadas */
+    }
+    /* Barras de progresso menores (Semanais) - MAIS GROSSAS */
+    div[data-testid="stVerticalBlock"]:not(:has(h2:contains("Meta Mensal"))) .stProgress > div > div > div > div {
+         height: 30px; /* Altura aumentada para barras semanais */
+         border-radius: 12px; /* Bordas mais arredondadas */
     }
     /* Estilo para métricas */
     div[data-testid="metric-container"] {
-        background-color: #f0f2f6; /* Fundo suave */
+        background-color: #f0f2f6;
         border: 1px solid #e6e6e6;
-        padding: 15px; /* Mais preenchimento */
+        padding: 15px;
         border-radius: 10px;
-        margin-bottom: 10px; /* Espaçamento inferior */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     /* Títulos das seções */
     h2 {
-        border-bottom: 3px solid #4CAF50; /* Linha inferior mais grossa e verde */
-        color: #333; /* Cor do texto mais escura */
+        border-bottom: 3px solid #4CAF50;
+        color: #333;
         padding-bottom: 8px;
-        margin-top: 30px; /* Mais espaço acima */
-        margin-bottom: 20px; /* Mais espaço abaixo */
+        margin-top: 30px;
+        margin-bottom: 20px;
     }
     /* Título principal */
     h1 {
-        color: #2c3e50; /* Cor mais escura para o título principal */
+        color: #2c3e50;
+        text-align: center; /* Centraliza o título principal */
+        margin-bottom: 30px; /* Mais espaço abaixo do título */
     }
     /* Subtítulo (Vendedora) */
     h3 {
-        color: #555; /* Cor cinza para o subtítulo */
-        margin-bottom: 25px;
+        color: #555;
+        text-align: center; /* Centraliza o subtítulo */
+        margin-bottom: 35px;
     }
     /* Divisores */
     hr {
         margin-top: 25px;
         margin-bottom: 25px;
-        border-top: 1px solid #ccc; /* Linha divisória mais sutil */
+        border-top: 1px solid #ccc;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -70,19 +79,17 @@ except IndexError:
 BASE_CSV_URL = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet="
 DEFAULT_VENDEDOR = "Sarah"
 
-# --- Carregamento de Dados via URL CSV --- 
-@st.cache_data(ttl=600)
+# --- Carregamento de Dados via URL CSV (CACHE REMOVIDO) --- 
+# @st.cache_data(ttl=60) # Cache removido para atualização frequente. Se precisar, use ttl baixo (ex: 60 segundos)
 def load_data_from_csv(sheet_name):
     """Carrega dados de uma aba específica da planilha Google via URL CSV."""
     try:
         csv_url = BASE_CSV_URL + urllib.parse.quote(sheet_name)
         df = pd.read_csv(csv_url)
-        # Mensagem de sucesso mais discreta ou pode ser removida
-        # st.success(f"Dados da aba '{sheet_name}' carregados com sucesso via CSV URL!")
+        # st.success(f"Dados da aba ", sheet_name, " carregados!") # Mensagem removida para interface mais limpa
         return df
     except Exception as e:
-        # Corrigido: Usando aspas simples dentro da f-string
-        st.error(f"Erro ao carregar dados da aba '{sheet_name}' via URL CSV: {e}. Verifique se a planilha está compartilhada como 'Qualquer pessoa com o link pode visualizar' e se o nome da aba está correto.")
+        st.error(f"Erro ao carregar dados da aba ", sheet_name, " via URL CSV: {e}. Verifique se a planilha está compartilhada como \"Qualquer pessoa com o link pode visualizar\" e se o nome da aba está correto.")
         return pd.DataFrame()
 
 metas_df_raw = load_data_from_csv("Metas")
@@ -100,38 +107,36 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
         required_metas_cols = {"Ano", "Mês", "Vendedor", "Meta_Mensal", "Bonus_Mensal", "Semana", "Inicio_Semana", "Fim_Semana", "Meta_Semanal", "Bonus_Semanal"}
         required_vendas_cols = {"Data", "Vendedor", "Valor"}
         
-        # Corrigido: Usando aspas simples dentro da f-string
         if not required_metas_cols.issubset(metas_df.columns):
-            st.error(f"Colunas faltando na aba 'Metas'. Necessário: {required_metas_cols}. Encontrado: {set(metas_df.columns)}")
+            st.error(f"Colunas faltando na aba \"Metas\". Necessário: {required_metas_cols}. Encontrado: {set(metas_df.columns)}")
             st.stop()
-        # Corrigido: Usando aspas simples dentro da f-string
         if not required_vendas_cols.issubset(vendas_df.columns):
-            st.error(f"Colunas faltando na aba 'Vendas'. Necessário: {required_vendas_cols}. Encontrado: {set(vendas_df.columns)}")
+            st.error(f"Colunas faltando na aba \"Vendas\". Necessário: {required_vendas_cols}. Encontrado: {set(vendas_df.columns)}")
             st.stop()
 
-        # Conversões de tipo (CORRIGIDO - SEM ESCAPE)
-        metas_df["Inicio_Semana"] = pd.to_datetime(metas_df["Inicio_Semana"], dayfirst=True, errors='coerce')
-        metas_df["Fim_Semana"] = pd.to_datetime(metas_df["Fim_Semana"], dayfirst=True, errors='coerce')
-        vendas_df["Data"] = pd.to_datetime(vendas_df["Data"], dayfirst=True, errors='coerce')
+        # Conversões de tipo
+        metas_df["Inicio_Semana"] = pd.to_datetime(metas_df["Inicio_Semana"], dayfirst=True, errors=\"coerce\")
+        metas_df["Fim_Semana"] = pd.to_datetime(metas_df["Fim_Semana"], dayfirst=True, errors=\"coerce\")
+        vendas_df["Data"] = pd.to_datetime(vendas_df["Data"], dayfirst=True, errors=\"coerce\")
         
         metas_df.dropna(subset=["Inicio_Semana", "Fim_Semana"], inplace=True)
         vendas_df.dropna(subset=["Data"], inplace=True)
 
         cols_numericas_metas = ["Meta_Mensal", "Bonus_Mensal", "Meta_Semanal", "Bonus_Semanal"]
         for col in cols_numericas_metas:
-            if metas_df[col].dtype == 'object': # Corrigido: aspas simples
+            if metas_df[col].dtype == \"object\":
                  metas_df[col] = metas_df[col].astype(str).str.replace(",", ".", regex=False)
-            metas_df[col] = pd.to_numeric(metas_df[col], errors='coerce').fillna(0) # CORRIGIDO - SEM ESCAPE
+            metas_df[col] = pd.to_numeric(metas_df[col], errors=\"coerce\").fillna(0)
             
         cols_numericas_vendas = ["Valor"]
         for col in cols_numericas_vendas:
-             if vendas_df[col].dtype == 'object': # Corrigido: aspas simples
+             if vendas_df[col].dtype == \"object\":
                  vendas_df[col] = vendas_df[col].astype(str).str.replace(",", ".", regex=False)
-             vendas_df[col] = pd.to_numeric(vendas_df[col], errors='coerce').fillna(0) # CORRIGIDO - SEM ESCAPE
+             vendas_df[col] = pd.to_numeric(vendas_df[col], errors=\"coerce\").fillna(0)
 
-        metas_df["Ano"] = pd.to_numeric(metas_df["Ano"], errors='coerce').fillna(0).astype(int) # CORRIGIDO - SEM ESCAPE
-        metas_df["Mês"] = pd.to_numeric(metas_df["Mês"], errors='coerce').fillna(0).astype(int) # CORRIGIDO - SEM ESCAPE
-        metas_df["Semana"] = pd.to_numeric(metas_df["Semana"], errors='coerce').fillna(0).astype(int) # CORRIGIDO - SEM ESCAPE
+        metas_df["Ano"] = pd.to_numeric(metas_df["Ano"], errors=\"coerce\").fillna(0).astype(int)
+        metas_df["Mês"] = pd.to_numeric(metas_df["Mês"], errors=\"coerce\").fillna(0).astype(int)
+        metas_df["Semana"] = pd.to_numeric(metas_df["Semana"], errors=\"coerce\").fillna(0).astype(int)
 
     except Exception as e:
         st.error(f"Erro durante o pré-processamento dos dados: {e}")
@@ -142,7 +147,7 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
     mes_atual = hoje.month
     ano_atual = hoje.year
 
-    st.subheader(f"Vendedora: {DEFAULT_VENDEDOR} — {hoje.strftime('%B de %Y')}") # CORRIGIDO - SEM ESCAPE
+    st.subheader(f"Vendedora: {DEFAULT_VENDEDOR} — {hoje.strftime(\"%B de %Y\")}")
 
     metas_mes_atual = metas_df[
         (metas_df["Ano"] == ano_atual) &
@@ -221,7 +226,7 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
         st.divider()
 
         # --- Todas as Metas Semanais ---
-        st.markdown(f"## 🗓️ Todas as Metas Semanais de {hoje.strftime('%B')}") # CORRIGIDO - SEM ESCAPE
+        st.markdown(f"## 🗓️ Todas as Metas Semanais de {hoje.strftime(\"%B\")}")
         total_bonus_semanal_ganho = 0
 
         for index, semana_info in metas_mes_atual.sort_values(by="Semana").iterrows():
@@ -270,5 +275,5 @@ else:
     st.error("Não foi possível carregar os dados de uma ou ambas as abas da planilha (Metas, Vendas). Verifique as mensagens de erro acima, o compartilhamento da planilha e os nomes das abas.")
 
 # --- Rodapé ---
-st.caption("Desenvolvido por Manus (vFinal Testado)")
+st.caption("Desenvolvido por Manus (vFinal Otimizado)")
 
