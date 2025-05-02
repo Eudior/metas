@@ -6,73 +6,104 @@ import urllib.parse
 # --- Configuração da Página (DEVE SER O PRIMEIRO COMANDO STREAMLIT) ---
 st.set_page_config(page_title="Painel de Metas de Vendas", layout="wide")
 
-# --- CSS Personalizado para Melhorias Visuais (Cards e Barras Grossas) --- 
+# --- CSS Personalizado para Melhorias Visuais (Cards COMPACTOS e Barras Grossas) --- 
 st.markdown("""
 <style>
-    /* Estilo base para os cards */
+    /* Estilo base para os cards COMPACTOS */
     .card {
-        background-color: #ffffff; /* Fundo branco */
+        background-color: #ffffff;
         border: 1px solid #e6e6e6;
-        padding: 25px; /* Mais preenchimento interno */
-        border-radius: 15px; /* Bordas mais arredondadas */
-        margin-bottom: 25px; /* Espaçamento entre cards */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra mais pronunciada */
-        transition: box-shadow 0.3s ease-in-out; /* Efeito suave ao passar o mouse */
+        padding: 15px; /* Reduzido */
+        border-radius: 10px; /* Levemente reduzido */
+        margin-bottom: 15px; /* Reduzido */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra mais sutil */
+        transition: box-shadow 0.3s ease-in-out;
     }
     .card:hover {
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
     }
 
-    /* Títulos dentro dos cards */
+    /* Títulos dentro dos cards COMPACTOS */
     .card h2 {
-        border-bottom: 3px solid #4CAF50;
+        border-bottom: 2px solid #4CAF50; /* Linha mais fina */
         color: #333;
-        padding-bottom: 10px;
-        margin-top: 0; /* Remove margem superior do h2 dentro do card */
-        margin-bottom: 20px;
-        font-size: 1.75rem; /* Tamanho do título do card */
+        padding-bottom: 5px; /* Reduzido */
+        margin-top: 0;
+        margin-bottom: 15px; /* Reduzido */
+        font-size: 1.4rem; /* Reduzido */
     }
 
-    /* Barra de progresso principal (Meta Mensal) - SUPER GROSSA */
+    /* Barra de progresso principal (Meta Mensal) - Grossa mas ajustada */
     .card:has(h2:contains("Meta Mensal")) .stProgress > div > div > div > div {
-        height: 40px; /* Aumenta MUITO a altura da barra */
-        border-radius: 20px; /* Bordas super arredondadas */
+        height: 30px; /* Ajustado */
+        border-radius: 15px;
     }
-    /* Barras de progresso menores (Semanais) - SUPER GROSSAS */
+    /* Barras de progresso menores (Semanais) - Grossa mas ajustada */
     .card:not(:has(h2:contains("Meta Mensal"))) .stProgress > div > div > div > div {
-         height: 35px; /* Altura aumentada para barras semanais */
-         border-radius: 18px; /* Bordas super arredondadas */
+         height: 25px; /* Ajustado */
+         border-radius: 12px;
     }
 
-    /* Estilo para métricas dentro dos cards */
+    /* Estilo para métricas dentro dos cards COMPACTOS */
     .card div[data-testid="metric-container"] {
-        background-color: #f8f9fa; /* Fundo levemente diferente para métricas */
-        border: none; /* Remove borda padrão da métrica */
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 5px;
-        box-shadow: none; /* Remove sombra padrão da métrica */
+        background-color: #f8f9fa;
+        border: none;
+        padding: 8px; /* Reduzido */
+        border-radius: 6px; /* Reduzido */
+        margin-bottom: 3px; /* Reduzido */
+        box-shadow: none;
     }
     .card div[data-testid="metric-container"] label {
-        font-weight: bold; /* Deixa o label da métrica em negrito */
+        font-weight: bold;
+        font-size: 0.9rem; /* Reduzido */
+    }
+     .card div[data-testid="metric-container"] div {
+        font-size: 1.1rem; /* Reduzido valor da métrica */
     }
 
     /* Título principal da página */
     h1 {
         color: #2c3e50;
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 25px; /* Reduzido */
+        font-size: 2rem; /* Reduzido */
     }
     /* Subtítulo (Vendedora) */
     h3 {
         color: #555;
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 25px; /* Reduzido */
+        font-size: 1.2rem; /* Reduzido */
     }
-    /* Remove divisores padrão, os cards já separam */
+    /* Remove divisores padrão */
     hr {
         display: none;
     }
+    /* Reduzir espaço extra de containers/blocos */
+    .stVerticalBlock, .stHorizontalBlock {
+        gap: 0.5rem; /* Tenta reduzir o gap entre elementos */
+    }
+    /* Reduzir espaço de st.write("") */
+    div[data-testid="stText"] p {
+        margin-bottom: 0.1rem; /* Tenta reduzir margem de parágrafos vazios */
+        line-height: 0.5; /* Tenta reduzir altura da linha */
+    }
+    /* Estilo para texto de semana/bonificação no card semanal */
+    .card p {
+         margin-bottom: 0.5rem; /* Reduz espaço abaixo dos parágrafos */
+         font-size: 0.95rem;
+    }
+    .card .stMarkdown p {
+         margin-bottom: 0.5rem; /* Reduz espaço abaixo dos parágrafos em markdown */
+         font-size: 0.95rem;
+    }
+    .card .stMarkdown hr {
+        display: block; /* Reabilita hr dentro do card semanal */
+        margin-top: 10px !important; /* Reduzido */
+        margin-bottom: 10px !important; /* Reduzido */
+        border-top: 1px solid #eee !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -123,7 +154,7 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
             st.error(f"Colunas faltando na aba \"Vendas\". Necessário: {required_vendas_cols}. Encontrado: {set(vendas_df.columns)}")
             st.stop()
 
-        # Conversões de tipo (CORREÇÃO MANUAL DEFINITIVA - errors='coerce')
+        # Conversões de tipo (CORREÇÃO DEFINITIVA - errors='coerce')
         metas_df["Inicio_Semana"] = pd.to_datetime(metas_df["Inicio_Semana"], dayfirst=True, errors='coerce')
         metas_df["Fim_Semana"] = pd.to_datetime(metas_df["Fim_Semana"], dayfirst=True, errors='coerce')
         vendas_df["Data"] = pd.to_datetime(vendas_df["Data"], dayfirst=True, errors='coerce')
@@ -156,7 +187,7 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
     mes_atual = hoje.month
     ano_atual = hoje.year
 
-    st.subheader(f"Vendedora: {DEFAULT_VENDEDOR} — {hoje.strftime('%B de %Y')}")
+    st.subheader(f"Vendedora: {DEFAULT_VENDEDOR} — {hoje.strftime('%B de %Y')}") # Corrigido strftime
 
     metas_mes_atual = metas_df[
         (metas_df["Ano"] == ano_atual) &
@@ -173,81 +204,86 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
     if metas_mes_atual.empty:
         st.warning(f"Nenhuma meta encontrada para {DEFAULT_VENDEDOR} em {mes_atual}/{ano_atual}.")
     else:
-        # --- Card: Meta Mensal ---
-        with st.container():
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
-            st.markdown("## 🎯 Meta Mensal")
-            meta_mensal_valor = metas_mes_atual["Meta_Mensal"].iloc[0]
-            bonus_mensal_valor = metas_mes_atual["Bonus_Mensal"].iloc[0]
-            total_vendido_mes = vendas_mes_atual["Valor"].sum()
-            progresso_mensal = (total_vendido_mes / meta_mensal_valor) * 100 if meta_mensal_valor > 0 else 0
-            bonus_mensal_atingido = total_vendido_mes >= meta_mensal_valor
+        # --- Layout Principal em Colunas (Meta Mensal | Semana Atual) ---
+        col_main1, col_main2 = st.columns(2)
 
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.metric("Total vendido", f"R$ {total_vendido_mes:,.2f}".replace(",", "."))
-                st.metric("Meta", f"R$ {meta_mensal_valor:,.2f}".replace(",", "."))
-                st.metric("Progresso", f"{progresso_mensal:.1f}%")
-                bonus_txt = f"✅ R$ {bonus_mensal_valor:,.2f}".replace(",", ".") if bonus_mensal_atingido else f"❌ R$ {bonus_mensal_valor:,.2f}".replace(",", ".")
-                st.metric("Bonificação", bonus_txt)
-            with col2:
-                st.write("") # Espaço para alinhar verticalmente
-                st.write("")
-                st.progress(min(progresso_mensal / 100, 1.0))
-            st.markdown("</div>", unsafe_allow_html=True)
+        with col_main1:
+            # --- Card: Meta Mensal ---
+            with st.container():
+                st.markdown("<div class='card'>", unsafe_allow_html=True)
+                st.markdown("## 🎯 Meta Mensal")
+                meta_mensal_valor = metas_mes_atual["Meta_Mensal"].iloc[0]
+                bonus_mensal_valor = metas_mes_atual["Bonus_Mensal"].iloc[0]
+                total_vendido_mes = vendas_mes_atual["Valor"].sum()
+                progresso_mensal = (total_vendido_mes / meta_mensal_valor) * 100 if meta_mensal_valor > 0 else 0
+                bonus_mensal_atingido = total_vendido_mes >= meta_mensal_valor
 
-        # --- Card: Semana Atual ---
-        with st.container():
-            st.markdown("<div class='card'>", unsafe_allow_html=True)
-            st.markdown("## 🟢 Semana Atual")
-            semana_atual_df = metas_mes_atual[
-                (metas_mes_atual["Inicio_Semana"] <= hoje) &
-                (metas_mes_atual["Fim_Semana"] + pd.Timedelta(days=1) > hoje)
-            ]
+                # Colunas internas para métricas e barra
+                col1_int, col2_int = st.columns([3, 2]) # Ajuste proporção se necessário
+                with col1_int:
+                    st.metric("Total vendido", f"R$ {total_vendido_mes:,.2f}".replace(",", "."))
+                    st.metric("Meta", f"R$ {meta_mensal_valor:,.2f}".replace(",", "."))
+                    bonus_txt = f"✅ R$ {bonus_mensal_valor:,.2f}".replace(",", ".") if bonus_mensal_atingido else f"❌ R$ {bonus_mensal_valor:,.2f}".replace(",", ".")
+                    st.metric("Bonificação", bonus_txt)
+                with col2_int:
+                    st.metric("Progresso", f"{progresso_mensal:.1f}%")
+                    st.progress(min(progresso_mensal / 100, 1.0))
+                st.markdown("</div>", unsafe_allow_html=True)
 
-            if not semana_atual_df.empty:
-                semana_atual_info = semana_atual_df.iloc[0]
-                inicio_sem = semana_atual_info["Inicio_Semana"].strftime("%d/%m")
-                fim_sem = semana_atual_info["Fim_Semana"].strftime("%d/%m")
-                meta_sem_valor = semana_atual_info["Meta_Semanal"]
-                bonus_sem_valor = semana_atual_info["Bonus_Semanal"]
-                num_semana = semana_atual_info["Semana"]
-
-                vendas_semana_atual = vendas_mes_atual[
-                    (vendas_mes_atual["Data"] >= semana_atual_info["Inicio_Semana"]) &
-                    (vendas_mes_atual["Data"] <= semana_atual_info["Fim_Semana"])
+        with col_main2:
+            # --- Card: Semana Atual ---
+            with st.container():
+                st.markdown("<div class='card'>", unsafe_allow_html=True)
+                st.markdown("## 🟢 Semana Atual")
+                semana_atual_df = metas_mes_atual[
+                    (metas_mes_atual["Inicio_Semana"] <= hoje) &
+                    (metas_mes_atual["Fim_Semana"] + pd.Timedelta(days=1) > hoje)
                 ]
-                total_vendido_sem = vendas_semana_atual["Valor"].sum()
-                progresso_sem = (total_vendido_sem / meta_sem_valor) * 100 if meta_sem_valor > 0 else 0
-                bonus_sem_atingido = total_vendido_sem >= meta_sem_valor
 
-                st.write(f"**Semana {num_semana} ({inicio_sem} a {fim_sem})**")
-                col1_sem, col2_sem = st.columns([2, 1])
-                with col1_sem:
-                    st.metric("Vendido na Semana", f"R$ {total_vendido_sem:,.2f}".replace(",", "."))
-                    st.metric("Meta Semanal", f"R$ {meta_sem_valor:,.2f}".replace(",", "."))
-                    bonus_sem_txt = f"✅ R$ {bonus_sem_valor:,.2f}".replace(",", ".") if bonus_sem_atingido else f"❌ R$ {bonus_sem_valor:,.2f}".replace(",", ".")
-                    st.metric("Bonificação Semanal", bonus_sem_txt)
-                with col2_sem:
-                    st.write("")
-                    st.write("")
-                    st.progress(min(progresso_sem / 100, 1.0))
-            else:
-                st.info("Não há informações de meta para a semana atual.")
-            st.markdown("</div>", unsafe_allow_html=True)
+                if not semana_atual_df.empty:
+                    semana_atual_info = semana_atual_df.iloc[0]
+                    inicio_sem = semana_atual_info["Inicio_Semana"].strftime("%d/%m")
+                    fim_sem = semana_atual_info["Fim_Semana"].strftime("%d/%m")
+                    meta_sem_valor = semana_atual_info["Meta_Semanal"]
+                    bonus_sem_valor = semana_atual_info["Bonus_Semanal"]
+                    num_semana = semana_atual_info["Semana"]
 
-        # --- Card: Todas as Metas Semanais ---
+                    vendas_semana_atual = vendas_mes_atual[
+                        (vendas_mes_atual["Data"] >= semana_atual_info["Inicio_Semana"]) &
+                        (vendas_mes_atual["Data"] <= semana_atual_info["Fim_Semana"])
+                    ]
+                    total_vendido_sem = vendas_semana_atual["Valor"].sum()
+                    progresso_sem = (total_vendido_sem / meta_sem_valor) * 100 if meta_sem_valor > 0 else 0
+                    bonus_sem_atingido = total_vendido_sem >= meta_sem_valor
+
+                    st.write(f"**Semana {num_semana} ({inicio_sem} a {fim_sem})**")
+                    # Colunas internas
+                    col1_sem_int, col2_sem_int = st.columns([3, 2])
+                    with col1_sem_int:
+                        st.metric("Vendido na Semana", f"R$ {total_vendido_sem:,.2f}".replace(",", "."))
+                        st.metric("Meta Semanal", f"R$ {meta_sem_valor:,.2f}".replace(",", "."))
+                        bonus_sem_txt = f"✅ R$ {bonus_sem_valor:,.2f}".replace(",", ".") if bonus_sem_atingido else f"❌ R$ {bonus_sem_valor:,.2f}".replace(",", ".")
+                        st.metric("Bonificação Semanal", bonus_sem_txt)
+                    with col2_sem_int:
+                        st.metric("Progresso", f"{progresso_sem:.1f}%")
+                        st.progress(min(progresso_sem / 100, 1.0))
+                else:
+                    st.info("Não há informações de meta para a semana atual.")
+                st.markdown("</div>", unsafe_allow_html=True)
+
+        # --- Card: Todas as Metas Semanais (Abaixo das colunas principais) ---
         with st.container():
             st.markdown("<div class='card'>", unsafe_allow_html=True)
-            st.markdown(f"## 🗓️ Todas as Metas Semanais de {hoje.strftime('%B')}")
+            st.markdown(f"## 🗓️ Todas as Metas Semanais de {hoje.strftime('%B')}") # Corrigido strftime
             total_bonus_semanal_ganho = 0
 
-            # Usar colunas para organizar as semanas lado a lado (ex: 2 colunas)
-            cols_semanas = st.columns(2)
+            # Usar colunas para organizar as semanas lado a lado (ex: 3 ou 4 colunas para mais compactação)
+            num_cols_semanais = 3 # Ajuste conforme necessário (2, 3 ou 4)
+            cols_semanas = st.columns(num_cols_semanais)
             col_idx = 0
 
             for index, semana_info in metas_mes_atual.sort_values(by="Semana").iterrows():
-                with cols_semanas[col_idx % 2]: # Alterna entre as colunas
+                with cols_semanas[col_idx % num_cols_semanais]: # Alterna entre as colunas
                     with st.container(): # Container para cada semana dentro da coluna
                         inicio_sem = semana_info["Inicio_Semana"].strftime("%d/%m")
                         fim_sem = semana_info["Fim_Semana"].strftime("%d/%m")
@@ -265,17 +301,17 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
                         if bonus_sem_atingido:
                             total_bonus_semanal_ganho += bonus_sem_valor
 
-                        st.write(f"**Semana {num_semana} ({inicio_sem} a {fim_sem})**")
-                        # Usar st.metric para consistência visual
+                        st.write(f"**Sem {num_semana} ({inicio_sem}-{fim_sem})**") # Mais compacto
                         st.metric("Progresso", f"R$ {total_vendido_sem:,.2f} / R$ {meta_sem_valor:,.2f}".replace(",", "."), f"{progresso_sem:.1f}%", delta_color="off")
                         bonus_sem_txt = f"✅ R$ {bonus_sem_valor:,.2f}".replace(",", ".") if bonus_sem_atingido else f"❌ R$ {bonus_sem_valor:,.2f}".replace(",", ".")
-                        st.write(f"Bonificação: {bonus_sem_txt}")
+                        st.write(f"Bônus: {bonus_sem_txt}") # Mais compacto
                         st.progress(min(progresso_sem / 100, 1.0))
-                        st.markdown("<hr style='margin-top: 15px; margin-bottom: 15px; border-top: 1px solid #eee;'>", unsafe_allow_html=True) # Divisor sutil entre semanas na mesma coluna
+                        # Remover o <hr> para mais compactação
+                        # st.markdown("<hr style='margin-top: 10px; margin-bottom: 10px; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
                 col_idx += 1
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # --- Card: Resumo Bonificações ---
+        # --- Card: Resumo Bonificações (Abaixo) ---
         with st.container():
             st.markdown("<div class='card'>", unsafe_allow_html=True)
             st.markdown("## 💰 Resumo Bonificações do Mês")
@@ -288,7 +324,6 @@ if not metas_df_raw.empty and not vendas_df_raw.empty:
             with col_res2:
                 st.metric("Bônus Mensal", f"R$ {bonus_mensal_ganho:,.2f}".replace(",", "."))
             with col_res3:
-                # Destaque maior para o total
                 st.metric("**TOTAL BÔNUS**", f"**R$ {total_bonus:,.2f}**".replace(",", "."))
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -296,5 +331,5 @@ else:
     st.error("Não foi possível carregar os dados de uma ou ambas as abas da planilha (Metas, Vendas). Verifique as mensagens de erro acima, o compartilhamento da planilha e os nomes das abas.")
 
 # --- Rodapé ---
-st.caption("Desenvolvido por Manus (vFinal Cards - CORRIGIDO e Testado)")
+st.caption("Desenvolvido por Manus (vFinal Cards Compactos - CORRIGIDO)")
 
